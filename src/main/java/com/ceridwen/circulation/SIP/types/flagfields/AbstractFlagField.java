@@ -69,7 +69,7 @@ public abstract class AbstractFlagField implements Serializable {
         return this.flags;
     }
 
-    protected boolean isSet(int field) {
+    public boolean isSet(int field) {
         this.checkLength();
         if ((field < this.flags.length()) && (this.getValid().length > 0)) {
             if (this.flags.charAt(field) == this.getValid()[this.getValid().length - 1]) {

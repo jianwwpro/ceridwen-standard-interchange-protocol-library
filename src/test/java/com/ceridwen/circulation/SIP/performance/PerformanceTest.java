@@ -5,6 +5,12 @@
  */
 package com.ceridwen.circulation.SIP.performance;
 
+import java.io.File;
+import java.util.Date;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.ceridwen.circulation.SIP.exceptions.ChecksumError;
 import com.ceridwen.circulation.SIP.exceptions.InvalidFieldLength;
 import com.ceridwen.circulation.SIP.exceptions.MandatoryFieldOmitted;
@@ -12,32 +18,16 @@ import com.ceridwen.circulation.SIP.exceptions.MessageNotUnderstood;
 import com.ceridwen.circulation.SIP.exceptions.RetriesExceeded;
 import com.ceridwen.circulation.SIP.exceptions.SequenceError;
 import com.ceridwen.circulation.SIP.messages.ACSStatus;
-import com.ceridwen.circulation.SIP.messages.BlockPatron;
-import com.ceridwen.circulation.SIP.messages.CheckIn;
 import com.ceridwen.circulation.SIP.messages.CheckOut;
-import com.ceridwen.circulation.SIP.messages.EndPatronSession;
-import com.ceridwen.circulation.SIP.messages.FeePaid;
-import com.ceridwen.circulation.SIP.messages.Hold;
-import com.ceridwen.circulation.SIP.messages.ItemInformation;
-import com.ceridwen.circulation.SIP.messages.ItemStatusUpdate;
-import com.ceridwen.circulation.SIP.messages.Login;
 import com.ceridwen.circulation.SIP.messages.Message;
-import com.ceridwen.circulation.SIP.messages.PatronEnable;
-import com.ceridwen.circulation.SIP.messages.PatronInformation;
-import com.ceridwen.circulation.SIP.messages.PatronStatusRequest;
-import com.ceridwen.circulation.SIP.messages.Renew;
-import com.ceridwen.circulation.SIP.messages.RenewAll;
 import com.ceridwen.circulation.SIP.messages.SCStatus;
 import com.ceridwen.circulation.SIP.netty.server.SIPDaemon;
 import com.ceridwen.circulation.SIP.samples.netty.DummyDriverFactory;
 import com.ceridwen.circulation.SIP.transport.SSLSocketConnection;
 import com.ceridwen.circulation.SIP.transport.SocketConnection;
 import com.ceridwen.circulation.SIP.types.enumerations.ProtocolVersion;
+
 import io.netty.handler.ssl.util.SelfSignedCertificate;
-import java.io.File;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 class ThreadCounter {
   private int count;
@@ -171,7 +161,7 @@ class ClientRunner extends Thread {
  * @author Matthew.Dovey
  */
 public class PerformanceTest {
-  private static final boolean SSL = true;
+  private static final boolean SSL = false;
   private static SelfSignedCertificate ssc;
   
   public static void main(String[] args) {
@@ -188,7 +178,7 @@ public class PerformanceTest {
         server = new SIPDaemon("Sample", "localhost", 12345, new DummyDriverFactory(), true);
       }
       server.start();
-      
+      //server.operationComplete();
       Scanner sc = new Scanner(System.in);
       
       while (true) {
@@ -207,22 +197,28 @@ public class PerformanceTest {
 
         ThreadCounter count = new ThreadCounter();
         
-        for (int i = 0; i <2000; i++) {
+        for (int i = 0; i <1; i++) {
           System.out.println("***CLIENT TEST INTERATION: " + i + " - ACTIVE THREADS: " + count.getCount());
-          new ClientRunner(new BlockPatron(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new CheckIn(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new CheckOut(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new EndPatronSession(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new FeePaid(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new Hold(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new ItemInformation(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new ItemStatusUpdate(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new Login(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new PatronEnable(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new PatronInformation(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new PatronStatusRequest(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new Renew(), ssc == null?null:ssc.certificate(), count).start();
-          new ClientRunner(new RenewAll(), ssc == null?null:ssc.certificate(), count).start();
+          CheckOut checkOut = new CheckOut();
+          checkOut.setTransactionDate(new Date());
+          checkOut.setItemIdentifier("987666");
+          checkOut.setPatronIdentifier("123456");
+          new ClientRunner(checkOut, ssc == null?null:ssc.certificate(), count).start();
+          
+//          new ClientRunner(new BlockPatron(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new CheckIn(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new CheckOut(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new EndPatronSession(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new FeePaid(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new Hold(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new ItemInformation(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new ItemStatusUpdate(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new Login(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new PatronEnable(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new PatronInformation(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new PatronStatusRequest(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new Renew(), ssc == null?null:ssc.certificate(), count).start();
+//          new ClientRunner(new RenewAll(), ssc == null?null:ssc.certificate(), count).start();
         }
 
         System.out.println("***STOPPING");

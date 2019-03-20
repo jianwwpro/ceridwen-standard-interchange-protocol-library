@@ -13,6 +13,7 @@ import com.ceridwen.circulation.SIP.messages.SCResend;
 import com.ceridwen.circulation.SIP.netty.server.driver.DriverFactory;
 import com.ceridwen.circulation.SIP.netty.server.driver.Driver;
 
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -72,7 +73,9 @@ public class SIPChannelHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.flush();
+        //ctx.flush();
+    	ctx.writeAndFlush(Unpooled.EMPTY_BUFFER)//4
+        .addListener(ChannelFutureListener.CLOSE);
     }
 
     @Override
